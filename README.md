@@ -1,5 +1,5 @@
 # SUKALYA.ai - AI-Powered Health Assistant
-**Deployed link:** https://sukalya-ai.vercel.app/ChatPage/Index_Chatpage.html
+**Deployed link:** https://sukalya-ai.vercel.app/
 
 ## 🏥 Project Overview
 
