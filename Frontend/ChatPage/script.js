@@ -102,6 +102,7 @@ const animate = () => {
 };
 
 // Global variables
+const BASE_URL = "https://sukalya-ai-backend.onrender.com";
 let chatCount = 0;
 let currentChatId = null;
 let chatHistory = {};
@@ -171,7 +172,7 @@ function sendMessage() {
     const typingIndicator = addTypingIndicator();
 
     // Send message to Flask backend
-    fetch('http://localhost:5000/chat', {
+    fetch(`${BASE_URL}/chat`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
