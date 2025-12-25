@@ -44,7 +44,23 @@ except Exception as db_error:
 
     if os.path.exists(EXCEL_FILE):
         disease_df = pd.read_excel(EXCEL_FILE)
+        
+        # Map Excel column names to Flask column names
+        column_mapping = {
+            "Name": "disease_name",
+            "Symptom Description": "description",
+            "Precaution 1": "symptom1",
+            "Precaution 2": "symptom2",
+            "Precaution 3": "symptom3"
+        }
+        
+        disease_df = disease_df.rename(columns=column_mapping)
+        
         print(f"✅ Loaded {len(disease_df)} diseases from Excel")
+        print("📋 Excel Columns:")
+        print(disease_df.columns.tolist())
+        print("\n📊 First few rows:")
+        print(disease_df.head())
     else:
         print("❌ No database or Excel file found")
 
@@ -62,7 +78,7 @@ def simple_disease_search(query: str):
             response = f"Description: {row.get('description', 'N/A')}\n\n"
 
             symptoms = []
-            for col in ["symptom1", "symptom2", "symptom2"]:
+            for col in ["symptom1", "symptom2", "symptom3"]:
                 val = row.get(col)
                 if pd.notna(val):
                     symptoms.append(f"• {val}")
