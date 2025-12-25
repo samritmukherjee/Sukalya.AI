@@ -1,122 +1,104 @@
 import pandas as pd
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import os
+import pymysql
 
-app = Flask(__name__)
-CORS(app)
+# ---------------- MYSQL CONNECTION ----------------
+conn = pymysql.connect(
+    host="localhost",
+    user="root",                
+    password=",D9Gzk2-q6Y67",  
+    database="healthbot",        
+    charset='utf8mb4',
+    autocommit=True
+)
+cursor = conn.cursor(pymysql.cursors.DictCursor)
 
-disease_df = pd.DataFrame()
+# ---------------- FETCH DATA ----------------
+cursor.execute("""
+    SELECT d.id as disease_id,
+           d.name as disease_name,
+           d.description,
+           d.symptom1,
+           d.symptom2,
+           d.symptom3,
+           GROUP_CONCAT(p.precaution_text SEPARATOR '; ') AS precautions
+    FROM diseases d
+    LEFT JOIN precautions p ON d.id = p.disease_id
+    GROUP BY d.id, d.name, d.description, d.symptom1, d.symptom2, d.symptom3;
+""")
+disease_data = cursor.fetchall()
+disease_df = pd.DataFrame(disease_data)
 
-# ================== TRY MYSQL FIRST ==================
-try:
-    import pymysql
+if disease_df.empty:
+    raise ValueError("No disease data found in database!")
 
-    conn = pymysql.connect(
-        host=os.environ.get("DB_HOST", "localhost"),
-        user=os.environ.get("DB_USER", "root"),
-        password=os.environ.get("DB_PASSWORD", ""),
-        database=os.environ.get("DB_NAME", "healthbot"),
-        charset="utf8mb4",
-        autocommit=True
-    )
+print(f"Loaded {len(disease_df)} diseases from database")
 
-    cursor = conn.cursor(pymysql.cursors.DictCursor)
-
-    cursor.execute("""
-        SELECT d.id as disease_id,
-               d.name as disease_name,
-               d.description,
-               d.symptom1,
-               d.symptom2,
-               d.symptom3
-        FROM diseases d;
-    """)
-
-    data = cursor.fetchall()
-    disease_df = pd.DataFrame(data)
-    print(f"✅ Loaded {len(disease_df)} diseases from MySQL")
-
-except Exception as db_error:
-    print("⚠️ MySQL not available, switching to Excel mode")
-
-    EXCEL_FILE = "Health Data Sheet.xlsx"
-
-    if os.path.exists(EXCEL_FILE):
-        disease_df = pd.read_excel(EXCEL_FILE)
-        
-        # Map Excel column names to Flask column names
-        column_mapping = {
-            "Name": "disease_name",
-            "Symptom Description": "description",
-            "Precaution 1": "symptom1",
-            "Precaution 2": "symptom2",
-            "Precaution 3": "symptom3"
-        }
-        
-        disease_df = disease_df.rename(columns=column_mapping)
-        
-        print(f"✅ Loaded {len(disease_df)} diseases from Excel")
-        print("📋 Excel Columns:")
-        print(disease_df.columns.tolist())
-        print("\n📊 First few rows:")
-        print(disease_df.head())
-    else:
-        print("❌ No database or Excel file found")
-
-# ================== SEARCH FUNCTION ==================
+#------------------Simple Search Function------------------------
 def simple_disease_search(query: str):
-    if disease_df.empty:
-        return "Medical database is not available right now."
-
-    query = query.lower().strip()
-
+    query_lower = query.lower().strip()
+    
+    # Direct name matching
     for _, row in disease_df.iterrows():
-        name = str(row.get("disease_name", "")).lower()
-
-        if query == name or query in name:
-            response = f"Description: {row.get('description', 'N/A')}\n\n"
-
+        disease_name = row['disease_name'].lower()
+        
+        # Exact match or contains match
+        if query_lower == disease_name or query_lower in disease_name:
+            # Format response with symptoms
+            response = f"Symptom Description: {row['description']}\n\n"
+            
+            # Add symptoms if they exist
             symptoms = []
-            for col in ["symptom1", "symptom2", "symptom3"]:
-                val = row.get(col)
-                if pd.notna(val):
-                    symptoms.append(f"• {val}")
-
+            if pd.notna(row['symptom1']) and row['symptom1'].strip():
+                symptoms.append(f"• {row['symptom1'].strip()}")
+            if pd.notna(row['symptom2']) and row['symptom2'].strip():
+                symptoms.append(f"• {row['symptom2'].strip()}")
+            if pd.notna(row['symptom3']) and row['symptom3'].strip():
+                symptoms.append(f"• {row['symptom3'].strip()}")
+            
             if symptoms:
-                response += "Symptoms:\n" + "\n".join(symptoms)
-
+                response += "Precautions:\n" + "\n".join(symptoms)
+            
             return response
-
+    
     return None
 
-# ================== ROUTES ==================
+# ---------------- FLASK APP ----------------
+app = Flask(__name__)
+CORS(app)  # Enable CORS for frontend communication
+
 @app.route("/chat", methods=["POST"])
 def chat():
     try:
         data = request.get_json()
-        msg = data.get("message", "").strip()
-
-        if not msg:
+        user_message = data.get("message", "").strip()
+        
+        if not user_message:
             return jsonify({"reply": "Please enter a valid message."})
-
-        reply = simple_disease_search(msg)
-
+        
+        # Simple disease search
+        reply = simple_disease_search(user_message)
+        
         if not reply:
+            # Log unknown query
+            try:
+                cursor.execute("INSERT INTO unknown_queries (query_text) VALUES (%s)", (user_message,))
+                conn.commit()
+            except:
+                pass  # Ignore if table doesn't exist
             return jsonify({"reply": "Sorry, I don't have information on that disease."})
-
+        
         return jsonify({"reply": reply})
-
+        
     except Exception as e:
-        return jsonify({"reply": "Server error occurred."})
-
+        print(f"Error in chat endpoint: {str(e)}")
+        return jsonify({"reply": "Sorry, I encountered an error. Please try again."})
 
 @app.route("/health", methods=["GET"])
-def health():
-    return jsonify({"status": "running"})
+def health_check():
+    return jsonify({"status": "healthy", "message": "Flask backend is running"})
 
-
-# ================== START ==================
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    print("Starting Flask server...")
+    app.run(debug=True, host="0.0.0.0", port=5000)
