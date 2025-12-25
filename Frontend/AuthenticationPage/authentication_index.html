@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dataset Authentication & Verification - SUKALYA.ai</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="authentication_style.css">
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+
+  <header class="header">
+    <a class="back-btn" href="../Index_Chatpage.html">← Back to Chat</a>
+    <div class="title-wrap">
+      <h1 class="title animate">Dataset Authentication & Verification</h1>
+      <p class="subtitle animate">This dataset has been reviewed and authenticated by certified and experienced doctor.</p>
+    </div>
+  </header>
+
+  <main class="main">
+    <section class="glass card animate" id="certificateSection">
+      <div class="certificate-wrap">
+        <img id="certificateImage" class="certificate" src="Verification page image.jpg" alt="Signed Certificate">
+        <div id="zoomHint" class="zoom-hint">Click to zoom</div>
+      </div>
+      <div class="verified-wrap animate">
+        <span class="verified-badge" id="verifiedBadge">✔️</span>
+        <span class="verified-text">Verified by: <strong>Dr. Debadeep Chakravarty, FDSRCS (Eng)</strong>, Oral & Maxillofacial Surgeon</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p class="disclaimer">⚠️ SUKALYA.ai is a supportive health guidance tool and does not replace professional medical diagnosis.</p>
+  </footer>
+
+  <div id="overlay" class="overlay" aria-hidden="true">
+    <img id="overlayImg" class="overlay-img" alt="Zoomed Certificate" />
+  </div>
+
+  <script src="authentication_sc.js"></script>
+</body>
+</html>
+

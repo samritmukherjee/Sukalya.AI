@@ -1,0 +1,41 @@
+# =========================
+# Python / Flask
+# =========================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+
+# =========================
+# Environment variables
+# =========================
+.env
+
+# =========================
+# Logs & temp files
+# =========================
+*.log
+
+# =========================
+# Database files
+# =========================
+*.sql
+*.db
+
+# =========================
+# Private medical datasets
+# =========================
+Backend/Health Data Sheet.xlsx
+*.xlsx
+
+# =========================
+# OS & editor junk
+# =========================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

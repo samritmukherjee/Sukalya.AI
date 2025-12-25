@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>SUKALYA - CODE RENEGADES</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Montserrat for headings -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="team_style.css">
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+  <div class="back-button-top">
+    <span class="back-btn" onclick="goBackToChat()">&larr; BACK TO CHAT</span>
+  </div>
+  <div class="header">
+    <div class="logo-container">
+      <img src="logoSukalya.ai.png" alt="Sukalya Logo" class="logo-img">
+    </div>
+    <span class="title">SUKALYA.ai</span>
+  </div>
+  <div class="members-section">
+    <div class="members-title">MEMBERS</div>
+    <div class="members-grid">
+      <div class="card" onclick="openModal(this)">
+        <img src="samrit.jpg" alt="Samrit Mukherjee">
+        <div class="card-details">
+          <div class="name">SAMRIT MUKHERJEE</div>
+          <div class="desc">TEAM LEAD <br>LEAD FULL-STACK DEVELOPER</div>
+          <div class="college">MSIT@CSE(AIML)</div>
+        </div>
+      </div>
+      <div class="card" onclick="openModal(this)">
+        <img src="richeek.jpg" alt="Richeek Mitra Mazumdar">
+        <div class="card-details">
+          <div class="name">RICHEEK MITRA MAZUMDAR</div>
+          <div class="desc">FRONTEND DEVELOPER</div>
+          <div class="college">MSIT@CSE(AIML)</div>
+        </div>
+      </div>
+      <div class="card" onclick="openModal(this)">
+        <img src="aryabi.jpg" alt="Aryabi Bhattacharjee">
+        <div class="card-details">
+          <div class="name">ARYABI BHATTACHARJEE</div>
+          <div class="desc">BACKEND DEVELOPER AND <br>RESEARCH</div>
+          <div class="college">MSIT@CSE(AIML)</div>
+        </div>
+      </div>
+      <div class="card" onclick="openModal(this)">
+        <img src="ratri.jpg" alt="Ratri Dutta">
+        <div class="card-details">
+          <div class="name">RATRI DUTTA</div>
+          <div class="desc">DATABASE DEVELOPER AND <br>PRESENTATION </div>
+          <div class="college">MSIT@CSE(AIML)</div>
+        </div>
+      </div>
+      <div class="card" onclick="openModal(this)">
+        <img src="caleb.png" alt="Caleb Gomes">
+        <div class="card-details">
+          <div class="name">CALEB GOMES</div>
+          <div class="desc">FULL-STACK ASSISTANT DEVELOPER</div>
+          <div class="college">MSIT@CSE(AIML)</div>
+        </div>
+      </div>
+      <div class="card" onclick="openModal(this)">
+        <img src="aryaman.png" alt="Aryaman Sen">
+        <div class="card-details">
+          <div class="name">ARYAMAN SEN</div>
+          <div class="desc">BRANDING & IDENTITY <br>DATABASE SUPPORT</div>
+          <div class="college">MSIT@CSBS</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="side-label">CODE RENEGADES</div>
+  <div class="footer-container">
+    <footer>
+    </footer>
+  </div>
+
+  <!-- Modal for enlarged card view -->
+  <div id="memberModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <div class="modal-card">
+        <img id="modalImage" src="" alt="">
+        <div class="modal-details">
+          <div id="modalName" class="modal-name"></div>
+          <div id="modalDesc" class="modal-desc"></div>
+          <div id="modalCollege" class="modal-college"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Particle Animation System (same as chat page)
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let mouse = {
+        x: undefined,
+        y: undefined
+    };
+
+    // Initialize canvas
+    const initCanvas = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    };
+
+    // Handle window resize
+    window.addEventListener('resize', initCanvas);
+
+    // Track mouse movement
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = e.x;
+        mouse.y = e.y;
+    });
+
+    // Particle class
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 0.5;
+            this.speedX = Math.random() * 0.5 - 0.25;
+            this.speedY = Math.random() * 0.5 - 0.25;
+            this.color = 'rgba(255, 255, 255, 0.5)';
+        }
+        
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+
+            // Bounce off edges
+            if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+            if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+
+            // Attraction to mouse
+            const dx = mouse.x - this.x;
+            const dy = mouse.y - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 150) {
+                this.x -= dx / 50;
+                this.y -= dy / 50;
+            }
+        }
+        
+        draw() {
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    // Create particles
+    const createParticles = () => {
+        particles = [];
+        const particleCount = canvas.width / 15;
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+    };
+
+    // Connect particles with lines
+    const connectParticles = () => {
+        let opacity = 1;
+        for (let a = 0; a < particles.length; a++) {
+            for (let b = a; b < particles.length; b++) {
+                const dx = particles[a].x - particles[b].x;
+                const dy = particles[a].y - particles[b].y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 100) {
+                    opacity = 1 - (distance / 100);
+                    ctx.strokeStyle = 'rgba(255, 255, 255,' + opacity + ')';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(particles[a].x, particles[a].y);
+                    ctx.lineTo(particles[b].x, particles[b].y);
+                    ctx.stroke();
+                }
+            }
+        }
+    };
+
+    // Animation loop
+    const animate = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            p.update();
+            p.draw();
+        });
+        connectParticles();
+        requestAnimationFrame(animate);
+    };
+
+    // Initialize particle animation when page loads
+    window.onload = () => {
+        initCanvas();
+        createParticles();
+        animate();
+    };
+
+    function goBackToChat() {
+      // Try to go back in history first, if that fails, navigate to chat page
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        // If no history, navigate to the chat page
+        window.location.href = '../Index_Chatpage.html';
+      }
+    }
+    
+    function openModal(card) {
+      const modal = document.getElementById('memberModal');
+      const img = card.querySelector('img');
+      const name = card.querySelector('.name').textContent;
+      const desc = card.querySelector('.desc').textContent;
+      const college = card.querySelector('.college').textContent;
+      
+      document.getElementById('modalImage').src = img.src;
+      document.getElementById('modalImage').alt = img.alt;
+      document.getElementById('modalName').textContent = name;
+      document.getElementById('modalDesc').textContent = desc;
+      document.getElementById('modalCollege').textContent = college;
+      
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeModal() {
+      const modal = document.getElementById('memberModal');
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      const modal = document.getElementById('memberModal');
+      if (event.target === modal) {
+        closeModal();
+      }
+    }
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeModal();
+      }
+    });
+  </script>
