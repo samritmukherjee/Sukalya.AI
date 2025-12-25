@@ -26,6 +26,15 @@ venv/
 *.sql
 *.db
 
+# =========================
+# =========================
+# Private medical datasets
+# =========================
+#Backend/Health Data Sheet.xlsx
+#*.xlsx
+#*.xls
+# =========================
+
 
 # =========================
 # OS & editor junk
